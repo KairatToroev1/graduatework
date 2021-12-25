@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from place.models import Tour,Company,Tour_abroad,Category,TourPhoto,\
-    About_us,Program
+    About_us,Program,Review,Rating,Orders
 
 class TourSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tour
         fields=['name','price','company','tour_features','category',
-                'included','date_of_departure','arrival_date','take_with_you',]
+                'included','date_of_departure','arrival_date','take_with_you','image','book_your_place']
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -29,11 +29,8 @@ class CategorySerializer(serializers.ModelSerializer):
 class TourPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model=TourPhoto
-        fields=['name','image','tour', ]
+        fields=['name','image','tour_id', ]
 
-# class FavorablePricesSerializer(serializers.Serializer):
-#     model=Favorable_prices
-#     fields=['name','price',]
 
 class AboutUsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,3 +41,51 @@ class ProgramSerializer(serializers.ModelSerializer):
     class Meta:
         model = Program
         fields = ['tour','program',]
+
+
+
+class ReviewCreateSerializer(serializers.ModelSerializer):
+    """Добавление отзыва"""
+
+    class Meta:
+        model = Review
+        fields = "__all__"
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    """Вывод отзыво"""
+
+    class Meta:
+        model = Review
+        fields = ("name", "text", "parent")
+
+
+class CreateRatingSerializer(serializers.ModelSerializer):
+    """Добавление рейтинга пользователем"""
+    class Meta:
+        model = Rating
+        fields = ("star", "tour")
+
+    def create(self, validated_data):
+        rating = Rating.objects.update_or_create(
+            tour=validated_data.get('tour', None),
+            defaults={'star': validated_data.get("star")}
+        )
+        return rating
+#
+
+class OrderSerializer(serializers.ModelSerializer):
+    tour = TourSerializer(read_only=True)
+    class Meta:
+        model = Orders
+        fields = ['id','tour','owner','total_amount','created_at','is_active','is_finish']
+
+class AllOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Orders
+        fields = ['id','tour','owner','total_amount','created_at','is_active','is_finish']
+
+class AddTourSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Orders
+        fields = ['id','tour','owner','total_amount','created_at','is_active','is_finish']
